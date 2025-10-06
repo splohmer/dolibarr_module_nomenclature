@@ -893,10 +893,11 @@ class TNomenclature extends TObjetStd
 	}
 
 	function load_product_ws(&$PDOdb) {
+		global $db;
 		$this->TNomenclatureWorkstation=array();
 
 		$sql = "SELECT fk_workstation, nb_hour,nb_hour_prepare,nb_hour_manufacture";
-		$sql.= " FROM ".$this->db->prefix()."workstation_product";
+		$sql.= " FROM ".$db->prefix()."workstation_product";
 		$sql.= " WHERE fk_product = ".$this->fk_object;
 		$PDOdb->Execute($sql);
 
@@ -1890,7 +1891,7 @@ class TNomenclatureWorkstation extends TObjetStd
     }
 
 	function getPrice(&$PDOdb, $coef_qty_price = 1, $type ='', $coef=1) {
-		global $conf;
+		global $conf, $db;
 
 		$nb_hour = 0;
 		$price = 0;
@@ -1900,7 +1901,7 @@ class TNomenclatureWorkstation extends TObjetStd
 		if($type == 'OF' && isModEnabled("of")) {
 
 			$PDOdb->Execute("SELECT SUM(thm * nb_hour) / SUM(nb_hour) as thm
-	                FROM ".$this->db->prefix()."asset_workstation_of
+	                FROM ".$db->prefix()."asset_workstation_of
 	                WHERE fk_asset_workstation=".$this->fk_workstation." AND date_maj>=DATE_SUB(NOW(), INTERVAL 6 MONTH) AND thm>0");
 
 			if($obj = $PDOdb->Get_line()) {
@@ -2013,12 +2014,13 @@ class TNomenclatureCoef extends TObjetStd
 
 	function delete(&$PDOdb)
 	{
+		global $db;
 		if ($this->code_type == 'coef_final') return false;
 
 		//Vérification que le coef ne soit pas utilisé - si utilisé alors on interdit la suppression
-		$sql = 'SELECT rowid FROM '.$this->db->prefix().'nomenclaturedet WHERE code_type = '.$PDOdb->quote($this->code_type).'
+		$sql = 'SELECT rowid FROM '.$db->prefix().'nomenclaturedet WHERE code_type = '.$PDOdb->quote($this->code_type).'
 				UNION
-				SELECT rowid FROM '.$this->db->prefix().'nomenclature_coef_object WHERE code_type = '.$PDOdb->quote($this->code_type);
+				SELECT rowid FROM '.$db->prefix().'nomenclature_coef_object WHERE code_type = '.$PDOdb->quote($this->code_type);
 
 		$res = $PDOdb->ExecuteAsArray($sql);
 
